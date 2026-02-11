@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - Gestion Moderne des Tâches</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #f9fafb;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .slide-in { animation: slideIn 0.4s ease-out forwards; }
+        .scale-in { animation: scaleIn 0.3s ease-out forwards; }
+        
+        /* Gradients */
+        .gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .gradient-secondary { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .gradient-success { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .gradient-warning { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .gradient-info { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+        
+        /* Cards */
+        .card-modern {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .card-modern:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-stat {
+            position: relative;
+            overflow: hidden;
+            color: white;
+            padding: 24px;
+            border-radius: 16px;
+        }
+        
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            padding: 12px 28px;
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* Priority styling */
+        .priority-urgent {
+            border-left: 5px solid #f5576c;
+            background: linear-gradient(to right, rgba(245, 87, 108, 0.05) 0%, transparent 100%);
+        }
+        
+        .priority-high {
+            border-left: 5px solid #f59e0b;
+            background: linear-gradient(to right, rgba(245, 158, 11, 0.05) 0%, transparent 100%);
+        }
+        
+        .priority-medium {
+            border-left: 5px solid #3b82f6;
+            background: linear-gradient(to right, rgba(59, 130, 246, 0.05) 0%, transparent 100%);
+        }
+        
+        .priority-low {
+            border-left: 5px solid #10b981;
+            background: linear-gradient(to right, rgba(16, 185, 129, 0.05) 0%, transparent 100%);
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease-out;
+        }
+        
+        /* Input */
+        .input-modern {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #e5e7eb;
+            padding: 12px 16px;
+            border-radius: 12px;
+            width: 100%;
+            font-size: 16px;
+        }
+        
+        .input-modern:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+        
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-urgent {
+            background: linear-gradient(135deg, rgba(245, 87, 108, 0.15) 0%, rgba(250, 112, 154, 0.15) 100%);
+            color: #f5576c;
+            border: 1px solid rgba(245, 87, 108, 0.3);
+        }
+        
+        .badge-high {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(251, 191, 36, 0.15) 100%);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .badge-medium {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(96, 165, 250, 0.15) 100%);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .badge-low {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(52, 211, 153, 0.15) 100%);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .badge-completed {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(52, 211, 153, 0.15) 100%);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .badge-in-progress {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(96, 165, 250, 0.15) 100%);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .badge-pending {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(251, 191, 36, 0.15) 100%);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            width: 280px;
+            min-height: 100vh;
+        }
+        
+        .nav-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            width: 100%;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 15px;
+            border: none;
+            background: none;
+            color: #d1d5db;
+            cursor: pointer;
+            text-align: left;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+        
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Progress bar */
+        .progress-bar {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        /* Checkbox */
+        .checkbox-custom {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+        
+        .checkbox-custom:checked {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+        }
+        
+        .checkbox-custom:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Calendar Styles */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 20px;
+        }
+        
+        .calendar-day {
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            transition: all 0.2s;
+        }
+        
+        .calendar-day:hover {
+            background: #f8fafc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .calendar-day.today {
+            background: #e0f2fe;
+            border-color: #0ea5e9;
+        }
+        
+        .calendar-day-header {
+            text-align: center;
+            font-weight: 600;
+            color: #4b5563;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .task-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+        }
+        
+        .task-indicator.urgent { background-color: #f5576c; }
+        .task-indicator.high { background-color: #f59e0b; }
+        .task-indicator.medium { background-color: #3b82f6; }
+        .task-indicator.low { background-color: #10b981; }
+        
+        .calendar-nav-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .calendar-nav-btn:hover {
+            background: #e5e7eb;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app"></div>
+    
+    <script>
+        // ========== DONNÉES ==========
+        let currentUser = null;
+        let isLoginView = true;
+        let currentModal = null;
+        let currentCalendarDate = new Date();
+        
+        const defaultUsers = [
+            { 
+                id: 1, 
+                username: 'admin', 
+                email: 'admin@taskflow.com', 
+                password: 'admin123', 
+                role: 'admin', 
+                full_name: 'Administrateur Principal',
+                avatar_color: '#667eea'
+            },
+            { 
+                id: 2, 
+                username: 'john', 
+                email: 'john@taskflow.com', 
+                password: 'john123', 
+                role: 'employee', 
+                full_name: 'John Doe',
+                avatar_color: '#f5576c'
+            },
+            { 
+                id: 3, 
+                username: 'jane', 
+                email: 'jane@taskflow.com', 
+                password: 'jane123', 
+                role: 'employee', 
+                full_name: 'Jane Smith',
+                avatar_color: '#4facfe'
+            }
+        ];
+        
+        const defaultTasks = [
+            { 
+                id: 1, 
+                title: 'Rapport trimestriel Q4', 
+                description: 'Préparer le rapport financier détaillé du quatrième trimestre',
+                created_by: 1,
+                assigned_to: [2],
+                status: 'pending',
+                priority: 'high',
+                category: 'Finance',
+                due_date: '2024-02-15',
+                created_at: '2024-02-01',
+                progress: 25
+            },
+            { 
+                id: 2, 
+                title: 'Refonte du site web', 
+                description: 'Mettre à jour le design et améliorer l\'UX',
+                created_by: 1,
+                assigned_to: [3],
+                status: 'in_progress',
+                priority: 'medium',
+                category: 'Développement',
+                due_date: '2024-02-20',
+                created_at: '2024-02-01',
+                progress: 60
+            },
+            { 
+                id: 3, 
+                title: 'Présentation client', 
+                description: 'Préparer la présentation du nouveau produit',
+                created_by: 1,
+                assigned_to: [2, 3],
+                status: 'pending',
+                priority: 'urgent',
+                category: 'Marketing',
+                due_date: '2024-02-12',
+                created_at: '2024-02-01',
+                progress: 10
+            },
+            { 
+                id: 4, 
+                title: 'Migration de données', 
+                description: 'Migrer les données vers le nouveau serveur',
+                created_by: 1,
+                assigned_to: [2],
+                status: 'completed',
+                priority: 'medium',
+                category: 'Technique',
+                due_date: '2024-02-05',
+                created_at: '2024-01-28',
+                progress: 100
+            },
+            { 
+                id: 5, 
+                title: 'Formation équipe', 
+                description: 'Organiser la formation sur le nouveau logiciel',
+                created_by: 1,
+                assigned_to: [3],
+                status: 'in_progress',
+                priority: 'low',
+                category: 'Ressources Humaines',
+                due_date: '2024-02-25',
+                created_at: '2024-02-01',
+                progress: 40
+            }
+        ];
+
+        let users = JSON.parse(localStorage.getItem('taskflow_users')) || defaultUsers;
+        let tasks = JSON.parse(localStorage.getItem('taskflow_tasks')) || defaultTasks;
+
+        function saveUsers() {
+            localStorage.setItem('taskflow_users', JSON.stringify(users));
+        }
+
+        function saveTasks() {
+            localStorage.setItem('taskflow_tasks', JSON.stringify(tasks));
+        }
+
+        // ========== AUTHENTIFICATION ==========
+        function login(username, password) {
+            const user = users.find(u => 
+                (u.username === username || u.email === username) && 
+                u.password === password
+            );
+            
+            if (user) {
+                const { password, ...userWithoutPassword } = user;
+                currentUser = userWithoutPassword;
+                localStorage.setItem('taskflow_current_user', JSON.stringify(userWithoutPassword));
+                renderApp();
+                return true;
+            }
+            return false;
+        }
+
+        function register(full_name, email, username, password) {
+            if (!full_name || !email || !username || !password) {
+                showNotification('Veuillez remplir tous les champs', 'error');
+                return false;
+            }
+            
+            if (users.some(u => u.email === email)) {
+                showNotification('Cet email est déjà utilisé', 'error');
+                return false;
+            }
+            
+            if (users.some(u => u.username === username)) {
+                showNotification('Ce nom d\'utilisateur est déjà pris', 'error');
+                return false;
+            }
+            
+            const colors = ['#667eea', '#f5576c', '#4facfe', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            const newUser = {
+                id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
+                username,
+                email,
+                password,
+                role: 'employee',
+                full_name,
+                avatar_color: randomColor
+            };
+            
+            users.push(newUser);
+            saveUsers();
+            
+            const { password: _, ...userWithoutPassword } = newUser;
+            currentUser = userWithoutPassword;
+            localStorage.setItem('taskflow_current_user', JSON.stringify(userWithoutPassword));
+            
+            showNotification('Compte créé avec succès ! Bienvenue ! 🎉', 'success');
+            renderApp();
+            return true;
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('taskflow_current_user');
+            renderApp();
+        }
+
+        function checkAuth() {
+            const savedUser = localStorage.getItem('taskflow_current_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+            }
+        }
+
+        // ========== PAGE DE CONNEXION/INSCRIPTION ==========
+        function renderLoginPage() {
+            if (isLoginView) {
+                return renderLoginView();
+            } else {
+                return renderRegisterView();
+            }
+        }
+
+        function renderLoginView() {
+            return `
+                <div class="min-h-screen relative overflow-hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="relative z-10 min-h-screen flex items-center justify-center p-4">
+                        <div class="card-modern w-full max-w-md overflow-hidden scale-in">
+                            <div class="gradient-primary p-8 text-center text-white">
+                                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style="background: rgba(255,255,255,0.2);">
+                                    <i class="fas fa-rocket text-3xl"></i>
+                                </div>
+                                <h1 class="text-3xl font-bold mb-2">TaskFlow</h1>
+                                <p class="text-sm opacity-90">Gestion intelligente de vos tâches</p>
+                            </div>
+                            
+                            <div class="p-8">
+                                <div id="loginForm">
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                            <i class="fas fa-user mr-2 text-purple-600"></i>
+                                            Nom d'utilisateur ou Email
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="username"
+                                            value="admin"
+                                            placeholder="Entrez votre identifiant"
+                                            class="input-modern"
+                                        />
+                                    </div>
+                                    
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                            <i class="fas fa-lock mr-2 text-purple-600"></i>
+                                            Mot de passe
+                                        </label>
+                                        <input
+                                            type="password"
+                                            id="password"
+                                            value="admin123"
+                                            placeholder="Entrez votre mot de passe"
+                                            class="input-modern"
+                                        />
+                                    </div>
+                                    
+                                    <button
+                                        onclick="handleLogin()"
+                                        class="btn-primary w-full mb-4"
+                                    >
+                                        <span class="flex items-center justify-center gap-2">
+                                            <i class="fas fa-sign-in-alt"></i>
+                                            Se connecter
+                                        </span>
+                                    </button>
+                                    
+                                    <div class="text-center mt-4">
+                                        <p class="text-gray-600">
+                                            Nouveau employé ? 
+                                            <button onclick="switchToRegister()" class="text-purple-600 font-semibold hover:text-purple-800 ml-1">
+                                                Créer un compte
+                                            </button>
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-8 pt-6 border-t border-gray-200">
+                                    <p class="text-xs text-gray-500 text-center mb-4 uppercase tracking-wide font-semibold">Comptes de démonstration</p>
+                                    <div class="space-y-3">
+                                        <button
+                                            onclick="useDemoAccount('admin')"
+                                            class="w-full py-3 px-4 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-3 hover:scale-105"
+                                            style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border: 2px solid rgba(102, 126, 234, 0.3);"
+                                        >
+                                            <div class="w-10 h-10 rounded-full flex items-center justify-center gradient-primary">
+                                                <i class="fas fa-crown text-white"></i>
+                                            </div>
+                                            <div class="text-left flex-1">
+                                                <div class="font-bold text-gray-800">Administrateur</div>
+                                                <div class="text-xs text-gray-600">admin / admin123</div>
+                                            </div>
+                                        </button>
+                                        
+                                        <button
+                                            onclick="useDemoAccount('john')"
+                                            class="w-full py-3 px-4 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-3 hover:scale-105"
+                                            style="background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%); border: 2px solid rgba(79, 172, 254, 0.3);"
+                                        >
+                                            <div class="w-10 h-10 rounded-full flex items-center justify-center gradient-success">
+                                                <i class="fas fa-user text-white"></i>
+                                            </div>
+                                            <div class="text-left flex-1">
+                                                <div class="font-bold text-gray-800">Employé</div>
+                                                <div class="text-xs text-gray-600">john / john123</div>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderRegisterView() {
+            return `
+                <div class="min-h-screen relative overflow-hidden" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <div class="relative z-10 min-h-screen flex items-center justify-center p-4">
+                        <div class="card-modern w-full max-w-md overflow-hidden scale-in">
+                            <div class="gradient-success p-8 text-center text-white">
+                                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style="background: rgba(255,255,255,0.2);">
+                                    <i class="fas fa-user-plus text-3xl"></i>
+                                </div>
+                                <h1 class="text-3xl font-bold mb-2">Créer un compte</h1>
+                                <p class="text-sm opacity-90">Rejoignez l'équipe TaskFlow</p>
+                            </div>
+                            
+                            <div class="p-8">
+                                <div id="registerForm">
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                            <i class="fas fa-id-card mr-2 text-blue-600"></i>
+                                            Nom complet
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="registerName"
+                                            placeholder="Ex: John Doe"
+                                            class="input-modern"
+                                        />
+                                    </div>
+                                    
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                            <i class="fas fa-envelope mr-2 text-blue-600"></i>
+                                            Email professionnel
+                                        </label>
+                                        <input
+                                            type="email"
+                                            id="registerEmail"
+                                            placeholder="exemple@entreprise.com"
+                                            class="input-modern"
+                                        />
+                                    </div>
+                                    
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                            <i class="fas fa-user mr-2 text-blue-600"></i>
+                                            Nom d'utilisateur
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="registerUsername"
+                                            placeholder="Choisissez un nom d'utilisateur"
+                                            class="input-modern"
+                                        />
+                                    </div>
+                                    
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                            <i class="fas fa-lock mr-2 text-blue-600"></i>
+                                            Mot de passe
+                                        </label>
+                                        <input
+                                            type="password"
+                                            id="registerPassword"
+                                            placeholder="Créez un mot de passe sécurisé"
+                                            class="input-modern"
+                                        />
+                                    </div>
+                                    
+                                    <button
+                                        onclick="handleRegister()"
+                                        class="btn-primary w-full mb-4"
+                                        style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"
+                                    >
+                                        <span class="flex items-center justify-center gap-2">
+                                            <i class="fas fa-user-plus"></i>
+                                            Créer mon compte
+                                        </span>
+                                    </button>
+                                    
+                                    <div class="text-center mt-4">
+                                        <p class="text-gray-600">
+                                            Vous avez déjà un compte ? 
+                                            <button onclick="switchToLogin()" class="text-blue-600 font-semibold hover:text-blue-800 ml-1">
+                                                Se connecter
+                                            </button>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showNotification('Veuillez remplir tous les champs', 'error');
+                return;
+            }
+            
+            if (login(username, password)) {
+                showNotification('Connexion réussie ! 🎉', 'success');
+            } else {
+                showNotification('Identifiants incorrects', 'error');
+            }
+        }
+
+        function handleRegister() {
+            const full_name = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const username = document.getElementById('registerUsername').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            
+            register(full_name, email, username, password);
+        }
+
+        function switchToRegister() {
+            isLoginView = false;
+            renderApp();
+        }
+
+        function switchToLogin() {
+            isLoginView = true;
+            renderApp();
+        }
+
+        function useDemoAccount(type) {
+            if (type === 'admin') {
+                document.getElementById('username').value = 'admin';
+                document.getElementById('password').value = 'admin123';
+            } else {
+                document.getElementById('username').value = 'john';
+                document.getElementById('password').value = 'john123';
+            }
+        }
+
+        // ========== APPLICATION PRINCIPALE ==========
+        function renderMainApp() {
+            return `
+                <div class="flex min-h-screen">
+                    <!-- Sidebar -->
+                    <div class="sidebar flex-shrink-0">
+                        <div class="p-6 border-b border-gray-700">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl flex items-center justify-center gradient-primary">
+                                    <i class="fas fa-rocket text-white text-xl"></i>
+                                </div>
+                                <div>
+                                    <h1 class="text-xl font-bold text-white">TaskFlow</h1>
+                                    <p class="text-xs text-gray-400">Pro Version</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 space-y-2">
+                            <button onclick="showDashboard()" id="nav-dashboard" class="nav-item active">
+                                <i class="fas fa-th-large"></i>
+                                <span>Dashboard</span>
+                            </button>
+                            
+                            <button onclick="showTaskManagement()" id="nav-tasks" class="nav-item">
+                                <i class="fas fa-tasks"></i>
+                                <span>Mes Tâches</span>
+                            </button>
+                            
+                            <button onclick="showCalendar()" id="nav-calendar" class="nav-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Calendrier</span>
+                            </button>
+                            
+                            ${currentUser.role === 'admin' ? `
+                                <button onclick="showEmployeeManagement()" id="nav-employees" class="nav-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>Équipe</span>
+                                </button>
+                                
+                                <button onclick="showCreateTaskModal()" id="nav-create" class="nav-item">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span>Créer une tâche</span>
+                                </button>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="p-4 border-t border-gray-700 mt-auto">
+                            <button onclick="showProfile()" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-800 transition-colors">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" style="background: ${currentUser.avatar_color};">
+                                    ${currentUser.full_name.charAt(0)}
+                                </div>
+                                <div class="flex-1 text-left">
+                                    <div class="text-sm font-semibold text-white">${currentUser.full_name}</div>
+                                    <div class="text-xs text-gray-400 capitalize">${currentUser.role}</div>
+                                </div>
+                                <i class="fas fa-cog text-gray-400"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Main Content -->
+                    <main class="flex-1 overflow-auto">
+                        <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+                            <div class="px-8 py-4 flex items-center justify-between">
+                                <h2 class="text-2xl font-bold text-gray-800">
+                                    Bonjour, ${currentUser.full_name.split(' ')[0]} 👋
+                                </h2>
+                                
+                                <div class="flex items-center gap-4">
+                                    ${currentUser.role === 'admin' ? `
+                                        <button onclick="showCreateTaskModal()" class="px-4 py-2 rounded-xl font-semibold text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                            <i class="fas fa-plus-circle mr-2"></i>
+                                            Nouvelle tâche
+                                        </button>
+                                    ` : ''}
+                                    <button onclick="logout()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors font-medium">
+                                        <i class="fas fa-sign-out-alt mr-2"></i>
+                                        Déconnexion
+                                    </button>
+                                </div>
+                            </div>
+                        </header>
+                        
+                        <div id="content" class="p-8">
+                            ${renderDashboard()}
+                        </div>
+                    </main>
+                </div>
+            `;
+        }
+
+        // ========== DASHBOARD ==========
+        function showDashboard() {
+            updateActiveNav('dashboard');
+            document.getElementById('content').innerHTML = renderDashboardContent();
+        }
+
+        function renderDashboard() {
+            return renderDashboardContent();
+        }
+
+        function renderDashboardContent() {
+            const userTasks = currentUser.role === 'admin' 
+                ? tasks 
+                : tasks.filter(task => task.assigned_to && task.assigned_to.includes(currentUser.id));
+            
+            const stats = {
+                totalTasks: userTasks.length,
+                pendingTasks: userTasks.filter(t => t.status === 'pending').length,
+                inProgressTasks: userTasks.filter(t => t.status === 'in_progress').length,
+                completedTasks: userTasks.filter(t => t.status === 'completed').length,
+                urgentTasks: userTasks.filter(t => t.priority === 'urgent').length,
+                highPriorityTasks: userTasks.filter(t => t.priority === 'high').length,
+                mediumPriorityTasks: userTasks.filter(t => t.priority === 'medium').length,
+                lowPriorityTasks: userTasks.filter(t => t.priority === 'low').length
+            };
+            
+            if (currentUser.role === 'admin') {
+                stats.totalEmployees = users.filter(u => u.role === 'employee').length;
+            }
+            
+            const completionRate = stats.totalTasks > 0 
+                ? Math.round((stats.completedTasks / stats.totalTasks) * 100) 
+                : 0;
+            
+            return `
+                <div class="fade-in">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Tableau de Bord</h1>
+                    <p class="text-gray-600 mb-8">Vue d'ensemble de vos activités et performances</p>
+                    
+                    <!-- STATISTIQUES -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="card-stat gradient-primary">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="p-3 rounded-xl" style="background: rgba(255,255,255,0.2);">
+                                    <i class="fas fa-tasks text-2xl"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-4xl font-bold mb-2">${stats.totalTasks}</h3>
+                            <p class="text-sm opacity-90">${currentUser.role === 'admin' ? 'Tâches totales' : 'Mes tâches'}</p>
+                        </div>
+                        
+                        <div class="card-stat gradient-warning">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="p-3 rounded-xl" style="background: rgba(255,255,255,0.2);">
+                                    <i class="fas fa-clock text-2xl"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-4xl font-bold mb-2">${stats.pendingTasks}</h3>
+                            <p class="text-sm opacity-90">En attente</p>
+                        </div>
+                        
+                        <div class="card-stat gradient-success">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="p-3 rounded-xl" style="background: rgba(255,255,255,0.2);">
+                                    <i class="fas fa-check-circle text-2xl"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-4xl font-bold mb-2">${stats.completedTasks}</h3>
+                            <p class="text-sm opacity-90">Terminées</p>
+                        </div>
+                        
+                        ${currentUser.role === 'admin' ? `
+                            <div class="card-stat gradient-info">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="p-3 rounded-xl" style="background: rgba(255,255,255,0.2);">
+                                        <i class="fas fa-users text-2xl"></i>
+                                    </div>
+                                </div>
+                                <h3 class="text-4xl font-bold mb-2">${stats.totalEmployees}</h3>
+                                <p class="text-sm opacity-90">Membres actifs</p>
+                            </div>
+                        ` : `
+                            <div class="card-stat gradient-secondary">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="p-3 rounded-xl" style="background: rgba(255,255,255,0.2);">
+                                        <i class="fas fa-exclamation-triangle text-2xl"></i>
+                                    </div>
+                                </div>
+                                <h3 class="text-4xl font-bold mb-2">${stats.urgentTasks}</h3>
+                                <p class="text-sm opacity-90">Tâches urgentes</p>
+                            </div>
+                        `}
+                    </div>
+                    
+                    <!-- TÂCHES RÉCENTES -->
+                    <div class="card-modern p-6 mb-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                <i class="fas fa-fire text-orange-500"></i>
+                                ${currentUser.role === 'admin' ? 'Tâches récentes' : 'Mes tâches actives'}
+                            </h2>
+                            <button onclick="showTaskManagement()" class="text-purple-600 hover:text-purple-800 font-medium text-sm flex items-center gap-2">
+                                Voir toutes
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                        
+                        ${userTasks.length === 0 ? `
+                            <div class="text-center py-12">
+                                <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+                                <p class="text-gray-500">Aucune tâche pour le moment</p>
+                            </div>
+                        ` : `
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                ${userTasks.slice(0, 6).map(task => `
+                                    <div class="priority-${task.priority} rounded-xl p-4 hover:shadow-lg transition-all cursor-pointer" onclick="showTaskDetails(${task.id})">
+                                        <div class="flex items-start justify-between mb-2">
+                                            <h3 class="font-semibold text-gray-800">${task.title}</h3>
+                                            <span class="badge badge-${task.priority}">
+                                                ${task.priority === 'urgent' ? 'URGENT' :
+                                                  task.priority === 'high' ? 'HAUTE' :
+                                                  task.priority === 'medium' ? 'MOYENNE' : 'BASSE'}
+                                            </span>
+                                        </div>
+                                        ${task.description ? `<p class="text-sm text-gray-600 mb-3">${task.description.substring(0, 80)}...</p>` : ''}
+                                        <div class="flex items-center justify-between text-sm text-gray-500">
+                                            <span><i class="fas fa-calendar-alt mr-1"></i> ${formatDate(task.due_date)}</span>
+                                            <span class="badge badge-${task.status === 'completed' ? 'completed' : task.status === 'in_progress' ? 'in-progress' : 'pending'}">
+                                                ${task.status === 'completed' ? 'Terminée' :
+                                                  task.status === 'in_progress' ? 'En cours' : 'En attente'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `}
+                    </div>
+                    
+                    <!-- STATISTIQUES DÉTAILLÉES -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="card-modern p-6">
+                            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                <i class="fas fa-chart-pie text-purple-600"></i>
+                                Répartition par statut
+                            </h2>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">
+                                            <i class="fas fa-clock text-yellow-500 mr-2"></i>
+                                            En attente
+                                        </span>
+                                        <span class="text-sm font-semibold">${stats.pendingTasks}</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${stats.totalTasks > 0 ? (stats.pendingTasks / stats.totalTasks * 100) : 0}%; background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">
+                                            <i class="fas fa-spinner text-blue-500 mr-2"></i>
+                                            En cours
+                                        </span>
+                                        <span class="text-sm font-semibold">${stats.inProgressTasks}</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${stats.totalTasks > 0 ? (stats.inProgressTasks / stats.totalTasks * 100) : 0}%; background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">
+                                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                            Terminées
+                                        </span>
+                                        <span class="text-sm font-semibold">${stats.completedTasks}</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${stats.totalTasks > 0 ? (stats.completedTasks / stats.totalTasks * 100) : 0}%; background: linear-gradient(90deg, #10b981 0%, #34d399 100%);"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">Taux d'achèvement</span>
+                                    <span class="text-lg font-bold ${completionRate >= 70 ? 'text-green-600' : completionRate >= 40 ? 'text-yellow-600' : 'text-red-600'}">
+                                        ${completionRate}%
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-modern p-6">
+                            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                <i class="fas fa-flag text-red-500"></i>
+                                Répartition par priorité
+                            </h2>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">
+                                            <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                                            Urgent
+                                        </span>
+                                        <span class="text-sm font-semibold text-red-600">${stats.urgentTasks}</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${stats.totalTasks > 0 ? (stats.urgentTasks / stats.totalTasks * 100) : 0}%; background: linear-gradient(90deg, #f5576c 0%, #fa709a 100%);"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">
+                                            <i class="fas fa-exclamation-circle text-orange-500 mr-2"></i>
+                                            Haute
+                                        </span>
+                                        <span class="text-sm font-semibold text-orange-600">${stats.highPriorityTasks}</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${stats.totalTasks > 0 ? (stats.highPriorityTasks / stats.totalTasks * 100) : 0}%; background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">
+                                            <i class="fas fa-flag text-blue-500 mr-2"></i>
+                                            Moyenne
+                                        </span>
+                                        <span class="text-sm font-semibold text-blue-600">${stats.mediumPriorityTasks}</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${stats.totalTasks > 0 ? (stats.mediumPriorityTasks / stats.totalTasks * 100) : 0}%; background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ========== CALENDRIER ==========
+        function showCalendar() {
+            updateActiveNav('calendar');
+            document.getElementById('content').innerHTML = renderCalendarContent();
+        }
+
+        function renderCalendarContent() {
+            const userTasks = currentUser.role === 'admin' 
+                ? tasks 
+                : tasks.filter(task => task.assigned_to && task.assigned_to.includes(currentUser.id));
+            
+            const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+            const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+            
+            const currentYear = currentCalendarDate.getFullYear();
+            const currentMonth = currentCalendarDate.getMonth();
+            const currentMonthName = monthNames[currentMonth];
+            
+            // Obtenir le premier jour du mois
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            // Obtenir le dernier jour du mois
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            // Nombre de jours dans le mois
+            const daysInMonth = lastDay.getDate();
+            // Premier jour de la semaine (0 = Dimanche, 1 = Lundi, etc.)
+            const firstDayOfWeek = firstDay.getDay();
+            // Ajuster pour que Lundi soit le premier jour (1)
+            const startDay = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+            
+            // Générer les jours du mois précédent
+            const prevMonthLastDay = new Date(currentYear, currentMonth, 0).getDate();
+            const prevMonthDays = [];
+            for (let i = startDay - 1; i >= 0; i--) {
+                prevMonthDays.push(prevMonthLastDay - i);
+            }
+            
+            // Générer les jours du mois actuel
+            const currentMonthDays = [];
+            for (let i = 1; i <= daysInMonth; i++) {
+                currentMonthDays.push(i);
+            }
+            
+            // Générer les jours du mois suivant
+            const totalCells = 42; // 6 semaines * 7 jours
+            const nextMonthDaysCount = totalCells - (prevMonthDays.length + currentMonthDays.length);
+            const nextMonthDays = [];
+            for (let i = 1; i <= nextMonthDaysCount; i++) {
+                nextMonthDays.push(i);
+            }
+            
+            // Toutes les dates du calendrier
+            const allDays = [...prevMonthDays, ...currentMonthDays, ...nextMonthDays];
+            
+            // Fonction pour obtenir les tâches d'un jour spécifique
+            function getTasksForDay(day, isCurrentMonth) {
+                if (!isCurrentMonth) return [];
+                
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                return userTasks.filter(task => task.due_date === dateStr);
+            }
+            
+            // Vérifier si c'est aujourd'hui
+            const today = new Date();
+            const isToday = (day) => {
+                return day === today.getDate() && 
+                       currentMonth === today.getMonth() && 
+                       currentYear === today.getFullYear();
+            };
+            
+            return `
+                <div class="fade-in">
+                    <div class="calendar-header">
+                        <div>
+                            <h1 class="text-3xl font-bold text-gray-800">Calendrier</h1>
+                            <p class="text-gray-600">Visualisez vos tâches par date d'échéance</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-2">
+                                <button onclick="changeCalendarMonth(-1)" class="calendar-nav-btn">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                
+                                <h2 class="text-xl font-bold text-gray-800 min-w-[200px] text-center">
+                                    ${currentMonthName} ${currentYear}
+                                </h2>
+                                
+                                <button onclick="changeCalendarMonth(1)" class="calendar-nav-btn">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                            
+                            <button onclick="goToToday()" class="px-4 py-2 bg-purple-50 text-purple-600 rounded-xl font-medium hover:bg-purple-100 transition-colors">
+                                <i class="fas fa-calendar-day mr-2"></i>Aujourd'hui
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- En-têtes des jours -->
+                    <div class="calendar-grid">
+                        ${dayNames.map(day => `
+                            <div class="calendar-day-header">
+                                ${day}
+                            </div>
+                        `).join('')}
+                        
+                        <!-- Jours du calendrier -->
+                        ${allDays.map((day, index) => {
+                            const isPrevMonth = index < prevMonthDays.length;
+                            const isNextMonth = index >= prevMonthDays.length + currentMonthDays.length;
+                            const isCurrentMonth = !isPrevMonth && !isNextMonth;
+                            
+                            const dayTasks = getTasksForDay(day, isCurrentMonth);
+                            const todayClass = isCurrentMonth && isToday(day) ? 'today' : '';
+                            
+                            return `
+                                <div class="calendar-day ${todayClass} ${!isCurrentMonth ? 'opacity-40' : ''}" 
+                                     onclick="${isCurrentMonth ? `showDayTasks(${currentYear}, ${currentMonth + 1}, ${day})` : ''}">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <span class="font-semibold ${isCurrentMonth ? 'text-gray-800' : 'text-gray-400'}">
+                                            ${day}
+                                        </span>
+                                        ${isCurrentMonth && isToday(day) ? `
+                                            <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                                                Aujourd'hui
+                                            </span>
+                                        ` : ''}
+                                    </div>
+                                    
+                                    <div class="space-y-1">
+                                        ${dayTasks.slice(0, 3).map(task => `
+                                            <div class="flex items-center text-xs p-1 rounded" 
+                                                 style="background: ${getPriorityColor(task.priority, 0.1)}; color: ${getPriorityColor(task.priority, 1)};">
+                                                <span class="task-indicator ${task.priority}"></span>
+                                                <span class="truncate">${task.title}</span>
+                                            </div>
+                                        `).join('')}
+                                        
+                                        ${dayTasks.length > 3 ? `
+                                            <div class="text-center text-xs text-gray-500">
+                                                +${dayTasks.length - 3} autres
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    
+                    <!-- Légende -->
+                    <div class="card-modern p-6 mt-6">
+                        <h3 class="font-semibold text-gray-700 mb-4">Légende des priorités</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="flex items-center gap-2">
+                                <div class="task-indicator urgent"></div>
+                                <span class="text-sm">Urgent</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="task-indicator high"></div>
+                                <span class="text-sm">Haute</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="task-indicator medium"></div>
+                                <span class="text-sm">Moyenne</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="task-indicator low"></div>
+                                <span class="text-sm">Basse</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function changeCalendarMonth(delta) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+            if (document.getElementById('nav-calendar').classList.contains('active')) {
+                showCalendar();
+            }
+        }
+
+        function goToToday() {
+            currentCalendarDate = new Date();
+            if (document.getElementById('nav-calendar').classList.contains('active')) {
+                showCalendar();
+            }
+        }
+
+        function getPriorityColor(priority, opacity = 1) {
+            const colors = {
+                urgent: `rgba(245, 87, 108, ${opacity})`,
+                high: `rgba(245, 158, 11, ${opacity})`,
+                medium: `rgba(59, 130, 246, ${opacity})`,
+                low: `rgba(16, 185, 129, ${opacity})`
+            };
+            return colors[priority] || `rgba(107, 114, 128, ${opacity})`;
+        }
+
+        function showDayTasks(year, month, day) {
+            const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const userTasks = currentUser.role === 'admin' 
+                ? tasks 
+                : tasks.filter(task => task.assigned_to && task.assigned_to.includes(currentUser.id));
+            
+            const dayTasks = userTasks.filter(task => task.due_date === dateStr);
+            
+            if (dayTasks.length === 0) {
+                showNotification('Aucune tâche pour cette date', 'info');
+                return;
+            }
+            
+            let message = `Tâches pour le ${day}/${month}/${year}:\n\n`;
+            dayTasks.forEach(task => {
+                message += `• ${task.title} (${task.priority}) - ${task.status}\n`;
+            });
+            
+            alert(message);
+        }
+
+        // ========== GESTION DES TÂCHES ==========
+        function showTaskManagement() {
+            updateActiveNav('tasks');
+            document.getElementById('content').innerHTML = renderTaskManagementContent();
+        }
+
+        function renderTaskManagementContent() {
+            const userTasks = currentUser.role === 'admin' 
+                ? tasks 
+                : tasks.filter(task => task.assigned_to && task.assigned_to.includes(currentUser.id));
+            
+            return `
+                <div class="fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-3xl font-bold text-gray-800">${currentUser.role === 'admin' ? 'Toutes les tâches' : 'Mes tâches'}</h1>
+                        ${currentUser.role === 'admin' ? `
+                            <button onclick="showCreateTaskModal()" class="px-6 py-3 rounded-xl font-semibold text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <i class="fas fa-plus-circle mr-2"></i>Nouvelle tâche
+                            </button>
+                        ` : ''}
+                    </div>
+                    
+                    ${userTasks.length === 0 ? `
+                        <div class="card-modern p-12 text-center">
+                            <i class="fas fa-tasks text-6xl text-gray-300 mb-4"></i>
+                            <h3 class="text-xl font-semibold text-gray-700 mb-2">Aucune tâche trouvée</h3>
+                            <p class="text-gray-500">${currentUser.role === 'admin' ? 'Créez votre première tâche !' : 'Aucune tâche ne vous a été assignée pour le moment.'}</p>
+                        </div>
+                    ` : `
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            ${userTasks.map(task => `
+                                <div class="card-modern overflow-hidden">
+                                    <div class="priority-${task.priority} p-6">
+                                        <div class="flex justify-between items-start mb-4">
+                                            <div>
+                                                <h3 class="font-bold text-gray-800 text-lg mb-1">${task.title}</h3>
+                                                <span class="badge badge-${task.priority}">
+                                                    ${task.priority === 'urgent' ? 'URGENT' :
+                                                      task.priority === 'high' ? 'HAUTE' :
+                                                      task.priority === 'medium' ? 'MOYENNE' : 'BASSE'}
+                                                </span>
+                                            </div>
+                                            ${currentUser.role === 'admin' ? `
+                                                <div class="flex gap-2">
+                                                    <button onclick="showEditTaskModal(${task.id})" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
+                                                        <i class="fas fa-edit text-gray-600"></i>
+                                                    </button>
+                                                    <button onclick="deleteTask(${task.id})" class="w-8 h-8 rounded-full bg-red-50 hover:bg-red-100 flex items-center justify-center">
+                                                        <i class="fas fa-trash text-red-500"></i>
+                                                    </button>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                        
+                                        ${task.description ? `<p class="text-gray-600 mb-4">${task.description}</p>` : ''}
+                                        
+                                        <div class="space-y-3 mb-4">
+                                            <div class="flex items-center text-sm text-gray-500">
+                                                <i class="fas fa-calendar-alt mr-2 w-4"></i>
+                                                <span>Échéance: ${formatDate(task.due_date)}</span>
+                                            </div>
+                                            <div class="flex items-center text-sm text-gray-500">
+                                                <i class="fas fa-tag mr-2 w-4"></i>
+                                                <span>Catégorie: ${task.category}</span>
+                                            </div>
+                                            <div class="flex items-center text-sm text-gray-500">
+                                                <i class="fas fa-user-circle mr-2 w-4"></i>
+                                                <span>Assigné à: ${getAssignedUsersNames(task.assigned_to)}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <div class="flex justify-between mb-1">
+                                                <span class="text-sm font-medium text-gray-700">Progression</span>
+                                                <span class="text-sm font-semibold ${task.progress === 100 ? 'text-green-600' : 'text-blue-600'}">${task.progress}%</span>
+                                            </div>
+                                            <div class="progress-bar">
+                                                <div class="progress-fill" style="width: ${task.progress}%"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <span class="badge badge-${task.status === 'completed' ? 'completed' : task.status === 'in_progress' ? 'in-progress' : 'pending'}">
+                                                ${task.status === 'completed' ? 'Terminée' :
+                                                  task.status === 'in_progress' ? 'En cours' : 'En attente'}
+                                            </span>
+                                            
+                                            ${task.assigned_to && task.assigned_to.includes(currentUser.id) ? `
+                                                <button onclick="toggleTaskStatus(${task.id})" class="px-3 py-1 ${task.status === 'completed' ? 'bg-gray-100 text-gray-600' : 'bg-green-50 text-green-600'} rounded-lg text-sm font-medium">
+                                                    <i class="fas ${task.status === 'completed' ? 'fa-undo' : 'fa-check'} mr-1"></i>
+                                                    ${task.status === 'completed' ? 'Rouvrir' : 'Terminer'}
+                                                </button>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        // ========== CRÉATION DE TÂCHES (ADMIN) ==========
+        function showCreateTaskModal() {
+            if (currentUser.role !== 'admin') {
+                showNotification('Seuls les administrateurs peuvent créer des tâches', 'error');
+                return;
+            }
+            
+            const employees = users.filter(u => u.role === 'employee');
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            
+            currentModal = {
+                type: 'create_task',
+                content: `
+                    <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto scale-in">
+                        <div class="gradient-primary p-6 text-white">
+                            <h2 class="text-2xl font-bold flex items-center gap-3">
+                                <i class="fas fa-plus-circle"></i>
+                                Nouvelle tâche
+                            </h2>
+                        </div>
+                        
+                        <div class="p-6 space-y-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Titre de la tâche *</label>
+                                <input
+                                    type="text"
+                                    id="taskTitle"
+                                    placeholder="Ex: Rapport mensuel"
+                                    class="input-modern"
+                                    required
+                                />
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                                <textarea
+                                    id="taskDescription"
+                                    placeholder="Décrivez la tâche en détail..."
+                                    rows="3"
+                                    class="input-modern"
+                                ></textarea>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Priorité *</label>
+                                    <select id="taskPriority" class="input-modern">
+                                        <option value="low">Basse</option>
+                                        <option value="medium" selected>Moyenne</option>
+                                        <option value="high">Haute</option>
+                                        <option value="urgent">Urgente</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Catégorie *</label>
+                                    <select id="taskCategory" class="input-modern">
+                                        <option value="Développement">Développement</option>
+                                        <option value="Design">Design</option>
+                                        <option value="Marketing" selected>Marketing</option>
+                                        <option value="Finance">Finance</option>
+                                        <option value="Ressources Humaines">Ressources Humaines</option>
+                                        <option value="Technique">Technique</option>
+                                        <option value="Autre">Autre</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Date d'échéance *</label>
+                                    <input
+                                        type="date"
+                                        id="taskDueDate"
+                                        value="${tomorrowStr}"
+                                        min="${tomorrowStr}"
+                                        class="input-modern"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Progression initiale</label>
+                                    <input
+                                        type="range"
+                                        id="taskProgress"
+                                        min="0"
+                                        max="100"
+                                        value="0"
+                                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                        oninput="document.getElementById('progressValue').textContent = this.value + '%'"
+                                    />
+                                    <div class="flex justify-between mt-2">
+                                        <span class="text-sm text-gray-600">0%</span>
+                                        <span id="progressValue" class="text-sm font-semibold">0%</span>
+                                        <span class="text-sm text-gray-600">100%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Statut *</label>
+                                <select id="taskStatus" class="input-modern">
+                                    <option value="pending" selected>En attente</option>
+                                    <option value="in_progress">En cours</option>
+                                    <option value="completed">Terminée</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Assigner à *</label>
+                                <p class="text-sm text-gray-500 mb-3">Sélectionnez au moins un employé</p>
+                                <div class="space-y-2 max-h-40 overflow-y-auto p-3 border border-gray-200 rounded-xl">
+                                    ${employees.map(employee => `
+                                        <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+                                            <input type="checkbox" value="${employee.id}" class="checkbox-custom">
+                                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold" style="background: ${employee.avatar_color};">
+                                                ${employee.full_name.charAt(0)}
+                                            </div>
+                                            <span class="flex-1">${employee.full_name}</span>
+                                            <span class="text-sm text-gray-500">${employee.email}</span>
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 border-t border-gray-200 flex justify-end gap-4">
+                            <button
+                                onclick="closeModal()"
+                                class="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                onclick="createTask()"
+                                class="px-6 py-3 rounded-xl font-semibold text-white transition-all shadow-lg hover:shadow-xl"
+                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"
+                            >
+                                <i class="fas fa-save mr-2"></i>
+                                Créer la tâche
+                            </button>
+                        </div>
+                    </div>
+                `
+            };
+            renderModal();
+        }
+
+        function createTask() {
+            if (currentUser.role !== 'admin') {
+                showNotification('Action non autorisée', 'error');
+                return;
+            }
+            
+            const title = document.getElementById('taskTitle').value.trim();
+            const description = document.getElementById('taskDescription').value.trim();
+            const priority = document.getElementById('taskPriority').value;
+            const category = document.getElementById('taskCategory').value;
+            const dueDate = document.getElementById('taskDueDate').value;
+            const progress = parseInt(document.getElementById('taskProgress').value);
+            const status = document.getElementById('taskStatus').value;
+            
+            const assignedTo = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(cb => parseInt(cb.value));
+            
+            // Validation
+            if (!title) {
+                showNotification('Veuillez saisir un titre pour la tâche', 'error');
+                return;
+            }
+            
+            if (assignedTo.length === 0) {
+                showNotification('Veuillez assigner la tâche à au moins un employé', 'error');
+                return;
+            }
+            
+            if (!dueDate) {
+                showNotification('Veuillez sélectionner une date d\'échéance', 'error');
+                return;
+            }
+            
+            // Créer la nouvelle tâche
+            const newTask = {
+                id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
+                title,
+                description,
+                created_by: currentUser.id,
+                assigned_to: assignedTo,
+                status: status,
+                priority,
+                category,
+                due_date: dueDate,
+                created_at: new Date().toISOString().split('T')[0],
+                progress: progress
+            };
+            
+            tasks.push(newTask);
+            saveTasks();
+            closeModal();
+            showNotification('Tâche créée avec succès !', 'success');
+            
+            // Rafraîchir l'affichage
+            if (document.getElementById('nav-tasks').classList.contains('active')) {
+                showTaskManagement();
+            } else if (document.getElementById('nav-dashboard').classList.contains('active')) {
+                showDashboard();
+            }
+        }
+
+        // ========== ÉDITION DE TÂCHES (ADMIN) ==========
+        function showEditTaskModal(taskId) {
+            if (currentUser.role !== 'admin') {
+                showNotification('Seuls les administrateurs peuvent modifier les tâches', 'error');
+                return;
+            }
+            
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            const employees = users.filter(u => u.role === 'employee');
+            
+            currentModal = {
+                type: 'edit_task',
+                content: `
+                    <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto scale-in">
+                        <div class="gradient-success p-6 text-white">
+                            <h2 class="text-2xl font-bold flex items-center gap-3">
+                                <i class="fas fa-edit"></i>
+                                Modifier la tâche
+                            </h2>
+                        </div>
+                        
+                        <div class="p-6 space-y-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Titre de la tâche *</label>
+                                <input
+                                    type="text"
+                                    id="editTaskTitle"
+                                    value="${task.title}"
+                                    placeholder="Ex: Rapport mensuel"
+                                    class="input-modern"
+                                    required
+                                />
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                                <textarea
+                                    id="editTaskDescription"
+                                    placeholder="Décrivez la tâche en détail..."
+                                    rows="3"
+                                    class="input-modern"
+                                >${task.description || ''}</textarea>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Priorité *</label>
+                                    <select id="editTaskPriority" class="input-modern">
+                                        <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Basse</option>
+                                        <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Moyenne</option>
+                                        <option value="high" ${task.priority === 'high' ? 'selected' : ''}>Haute</option>
+                                        <option value="urgent" ${task.priority === 'urgent' ? 'selected' : ''}>Urgente</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Catégorie *</label>
+                                    <select id="editTaskCategory" class="input-modern">
+                                        <option value="Développement" ${task.category === 'Développement' ? 'selected' : ''}>Développement</option>
+                                        <option value="Design" ${task.category === 'Design' ? 'selected' : ''}>Design</option>
+                                        <option value="Marketing" ${task.category === 'Marketing' ? 'selected' : ''}>Marketing</option>
+                                        <option value="Finance" ${task.category === 'Finance' ? 'selected' : ''}>Finance</option>
+                                        <option value="Ressources Humaines" ${task.category === 'Ressources Humaines' ? 'selected' : ''}>Ressources Humaines</option>
+                                        <option value="Technique" ${task.category === 'Technique' ? 'selected' : ''}>Technique</option>
+                                        <option value="Autre" ${task.category === 'Autre' ? 'selected' : ''}>Autre</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Date d'échéance *</label>
+                                    <input
+                                        type="date"
+                                        id="editTaskDueDate"
+                                        value="${task.due_date}"
+                                        class="input-modern"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Progression</label>
+                                    <input
+                                        type="range"
+                                        id="editTaskProgress"
+                                        min="0"
+                                        max="100"
+                                        value="${task.progress}"
+                                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                        oninput="document.getElementById('editProgressValue').textContent = this.value + '%'"
+                                    />
+                                    <div class="flex justify-between mt-2">
+                                        <span class="text-sm text-gray-600">0%</span>
+                                        <span id="editProgressValue" class="text-sm font-semibold">${task.progress}%</span>
+                                        <span class="text-sm text-gray-600">100%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Statut *</label>
+                                <select id="editTaskStatus" class="input-modern">
+                                    <option value="pending" ${task.status === 'pending' ? 'selected' : ''}>En attente</option>
+                                    <option value="in_progress" ${task.status === 'in_progress' ? 'selected' : ''}>En cours</option>
+                                    <option value="completed" ${task.status === 'completed' ? 'selected' : ''}>Terminée</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Assigner à *</label>
+                                <p class="text-sm text-gray-500 mb-3">Sélectionnez au moins un employé</p>
+                                <div class="space-y-2 max-h-40 overflow-y-auto p-3 border border-gray-200 rounded-xl">
+                                    ${employees.map(employee => `
+                                        <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+                                            <input type="checkbox" value="${employee.id}" class="checkbox-custom" ${task.assigned_to && task.assigned_to.includes(employee.id) ? 'checked' : ''}>
+                                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold" style="background: ${employee.avatar_color};">
+                                                ${employee.full_name.charAt(0)}
+                                            </div>
+                                            <span class="flex-1">${employee.full_name}</span>
+                                            <span class="text-sm text-gray-500">${employee.email}</span>
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 border-t border-gray-200 flex justify-end gap-4">
+                            <button
+                                onclick="closeModal()"
+                                class="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                onclick="updateTask(${task.id})"
+                                class="px-6 py-3 rounded-xl font-semibold text-white transition-all shadow-lg hover:shadow-xl"
+                                style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%);"
+                            >
+                                <i class="fas fa-save mr-2"></i>
+                                Mettre à jour
+                            </button>
+                        </div>
+                    </div>
+                `
+            };
+            renderModal();
+        }
+
+        function updateTask(taskId) {
+            if (currentUser.role !== 'admin') {
+                showNotification('Action non autorisée', 'error');
+                return;
+            }
+            
+            const taskIndex = tasks.findIndex(t => t.id === taskId);
+            if (taskIndex === -1) return;
+            
+            const title = document.getElementById('editTaskTitle').value.trim();
+            const description = document.getElementById('editTaskDescription').value.trim();
+            const priority = document.getElementById('editTaskPriority').value;
+            const category = document.getElementById('editTaskCategory').value;
+            const dueDate = document.getElementById('editTaskDueDate').value;
+            const progress = parseInt(document.getElementById('editTaskProgress').value);
+            const status = document.getElementById('editTaskStatus').value;
+            
+            const assignedTo = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(cb => parseInt(cb.value));
+            
+            // Validation
+            if (!title) {
+                showNotification('Veuillez saisir un titre pour la tâche', 'error');
+                return;
+            }
+            
+            if (assignedTo.length === 0) {
+                showNotification('Veuillez assigner la tâche à au moins un employé', 'error');
+                return;
+            }
+            
+            if (!dueDate) {
+                showNotification('Veuillez sélectionner une date d\'échéance', 'error');
+                return;
+            }
+            
+            // Mettre à jour la tâche
+            tasks[taskIndex] = {
+                ...tasks[taskIndex],
+                title,
+                description,
+                priority,
+                category,
+                due_date: dueDate,
+                progress: progress,
+                status: status,
+                assigned_to: assignedTo
+            };
+            
+            saveTasks();
+            closeModal();
+            showNotification('Tâche mise à jour avec succès !', 'success');
+            
+            // Rafraîchir l'affichage
+            if (document.getElementById('nav-tasks').classList.contains('active')) {
+                showTaskManagement();
+            } else if (document.getElementById('nav-dashboard').classList.contains('active')) {
+                showDashboard();
+            }
+        }
+
+        // ========== GESTION DES EMPLOYÉS ==========
+        function showEmployeeManagement() {
+            if (currentUser.role !== 'admin') {
+                showNotification('Accès réservé aux administrateurs', 'error');
+                return;
+            }
+            
+            updateActiveNav('employees');
+            const employees = users.filter(u => u.role === 'employee');
+            
+            document.getElementById('content').innerHTML = `
+                <div class="fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-3xl font-bold text-gray-800">Gestion de l'Équipe</h1>
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            ${employees.length} employé(s)
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${employees.map(employee => {
+                            const assignedTasks = tasks.filter(t => t.assigned_to && t.assigned_to.includes(employee.id));
+                            const completedTasks = assignedTasks.filter(t => t.status === 'completed').length;
+                            const pendingTasks = assignedTasks.filter(t => t.status === 'pending').length;
+                            const inProgressTasks = assignedTasks.filter(t => t.status === 'in_progress').length;
+                            
+                            return `
+                                <div class="card-modern p-6 hover:shadow-xl transition-all duration-300">
+                                    <div class="text-center mb-6">
+                                        <div class="inline-block mb-4 relative">
+                                            <div class="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold" style="background: ${employee.avatar_color};">
+                                                ${employee.full_name.charAt(0)}
+                                            </div>
+                                            <div class="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-white border-4 border-gray-50 flex items-center justify-center shadow-md">
+                                                <span class="text-xs font-bold ${assignedTasks.length > 5 ? 'text-red-500' : assignedTasks.length > 2 ? 'text-yellow-500' : 'text-green-500'}">
+                                                    ${assignedTasks.length}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <h3 class="text-xl font-bold text-gray-800 mb-1">${employee.full_name}</h3>
+                                        <p class="text-sm text-gray-600 mb-4">${employee.email}</p>
+                                    </div>
+                                    
+                                    <div class="space-y-4">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Tâches assignées</span>
+                                            <span class="font-bold text-gray-800">${assignedTasks.length}</span>
+                                        </div>
+                                        
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between text-sm">
+                                                <span class="text-green-600">Terminées</span>
+                                                <span class="font-semibold">${completedTasks}</span>
+                                            </div>
+                                            <div class="flex justify-between text-sm">
+                                                <span class="text-blue-600">En cours</span>
+                                                <span class="font-semibold">${inProgressTasks}</span>
+                                            </div>
+                                            <div class="flex justify-between text-sm">
+                                                <span class="text-yellow-600">En attente</span>
+                                                <span class="font-semibold">${pendingTasks}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // ========== MODAL SYSTEM ==========
+        function renderModal() {
+            const modalHTML = `
+                <div class="modal-overlay" onclick="closeModal()">
+                    ${currentModal.content}
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Empêcher la fermeture quand on clique à l'intérieur
+            document.querySelector('.modal-overlay > div').addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+
+        function closeModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                modal.remove();
+            }
+            currentModal = null;
+        }
+
+        // ========== GESTION DES TÂCHES ==========
+        function editTask(taskId) {
+            if (currentUser.role !== 'admin') {
+                showNotification('Seuls les administrateurs peuvent modifier les tâches', 'error');
+                return;
+            }
+            
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            showEditTaskModal(taskId);
+        }
+
+        function deleteTask(taskId) {
+            if (currentUser.role !== 'admin') {
+                showNotification('Seuls les administrateurs peuvent supprimer les tâches', 'error');
+                return;
+            }
+            
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) return;
+            
+            tasks = tasks.filter(t => t.id !== taskId);
+            saveTasks();
+            showNotification('Tâche supprimée avec succès', 'success');
+            
+            if (document.getElementById('nav-tasks').classList.contains('active')) {
+                showTaskManagement();
+            } else if (document.getElementById('nav-dashboard').classList.contains('active')) {
+                showDashboard();
+            }
+        }
+
+        function toggleTaskStatus(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            if (task.status === 'completed') {
+                task.status = 'pending';
+                task.progress = 0;
+            } else {
+                task.status = 'completed';
+                task.progress = 100;
+            }
+            
+            saveTasks();
+            showNotification('Statut de la tâche modifié !', 'success');
+            
+            if (document.getElementById('nav-tasks').classList.contains('active')) {
+                showTaskManagement();
+            } else if (document.getElementById('nav-dashboard').classList.contains('active')) {
+                showDashboard();
+            }
+        }
+
+        function showTaskDetails(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            const assignedUsers = getAssignedUsersNames(task.assigned_to);
+            const createdByUser = users.find(u => u.id === task.created_by);
+            const createdByName = createdByUser ? createdByUser.full_name : 'Inconnu';
+            
+            let message = `DÉTAILS DE LA TÂCHE\n\n`;
+            message += `Titre: ${task.title}\n\n`;
+            if (task.description) {
+                message += `Description: ${task.description}\n\n`;
+            }
+            message += `Statut: ${task.status === 'completed' ? 'Terminée' : task.status === 'in_progress' ? 'En cours' : 'En attente'}\n`;
+            message += `Priorité: ${task.priority === 'urgent' ? 'Urgente' : task.priority === 'high' ? 'Haute' : task.priority === 'medium' ? 'Moyenne' : 'Basse'}\n`;
+            message += `Catégorie: ${task.category}\n`;
+            message += `Progression: ${task.progress}%\n`;
+            message += `Date d'échéance: ${formatDate(task.due_date)}\n`;
+            message += `Créée par: ${createdByName}\n`;
+            message += `Assignée à: ${assignedUsers}\n`;
+            message += `Date de création: ${formatDate(task.created_at)}`;
+            
+            alert(message);
+        }
+
+        function showProfile() {
+            updateActiveNav('profile');
+            document.getElementById('content').innerHTML = `
+                <div class="max-w-4xl mx-auto fade-in">
+                    <div class="card-modern p-8">
+                        <div class="flex items-center gap-6 mb-8 pb-8 border-b border-gray-200">
+                            <div class="w-24 h-24 rounded-full flex items-center justify-center text-white text-3xl font-bold" style="background: ${currentUser.avatar_color};">
+                                ${currentUser.full_name.charAt(0)}
+                            </div>
+                            <div class="flex-1">
+                                <h1 class="text-3xl font-bold text-gray-800 mb-2">${currentUser.full_name}</h1>
+                                <p class="text-gray-600 mb-3">${currentUser.email}</p>
+                                <span class="inline-block px-4 py-2 rounded-xl font-semibold gradient-primary text-white capitalize">
+                                    ${currentUser.role === 'admin' ? 'Administrateur' : 'Employé'}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Nom complet</label>
+                                <div class="px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-200 font-medium text-gray-800">
+                                    ${currentUser.full_name}
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                                <div class="px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-200 font-medium text-gray-800">
+                                    ${currentUser.email}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <button onclick="logout()" class="px-8 py-3 rounded-xl font-semibold text-white" style="background: linear-gradient(135deg, #f5576c 0%, #fa709a 100%);">
+                                <i class="fas fa-sign-out-alt mr-2"></i>
+                                Se déconnecter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateActiveNav(section) {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const navItem = document.getElementById('nav-' + section);
+            if (navItem) {
+                navItem.classList.add('active');
+            }
+        }
+
+        // ========== FONCTIONS UTILITAIRES ==========
+        function formatDate(dateString) {
+            if (!dateString) return 'Non définie';
+            const date = new Date(dateString);
+            const options = { day: 'numeric', month: 'short', year: 'numeric' };
+            return date.toLocaleDateString('fr-FR', options);
+        }
+
+        function getAssignedUsersNames(userIds) {
+            if (!userIds || userIds.length === 0) return 'Non assigné';
+            return userIds.map(id => {
+                const user = users.find(u => u.id === id);
+                return user ? user.full_name : 'Inconnu';
+            }).join(', ');
+        }
+
+        function showNotification(message, type = 'info') {
+            // Supprimer toute notification existante
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            
+            const colors = {
+                success: 'gradient-success',
+                error: 'gradient-secondary',
+                info: 'gradient-primary',
+                warning: 'gradient-warning'
+            };
+            
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                info: 'fa-info-circle',
+                warning: 'fa-exclamation-triangle'
+            };
+            
+            notification.innerHTML = `
+                <div class="${colors[type]} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3">
+                    <i class="fas ${icons[type]} text-2xl"></i>
+                    <span class="font-semibold">${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // ========== INITIALISATION ==========
+        function renderApp() {
+            const appElement = document.getElementById('app');
+            checkAuth();
+            
+            if (!currentUser) {
+                appElement.innerHTML = renderLoginPage();
+            } else {
+                appElement.innerHTML = renderMainApp();
+            }
+        }
+
+        // Démarrer l'application
+        renderApp();
+    </script>
+</body>
+</html>
